@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const taskRoutes = require('./routes/taskRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
+const requestLogger = require('./middleware/requestLogger');
 const { initDB } = require('./config/db');
 
 const app = express();
@@ -10,6 +11,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+app.use(requestLogger);
 
 app.use('/api/tasks', taskRoutes);
 
