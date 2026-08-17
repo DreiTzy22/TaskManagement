@@ -1,212 +1,206 @@
-# TaskManagement
-Practical Exam system
 # Task Management Application
 
 A fullstack Task Management Application built with **React + Vite** (frontend), **Node.js + Express** (backend), and **PostgreSQL** (database).
 
+This project implements the required core features: Create, Read, Update, Delete tasks, plus Search, and Filter functionality.
+
 ---
 
-## Features
+## Core Features
 
-- **Add a task** - Create tasks with title and optional description
-- **Mark as complete / incomplete** - Toggle task completion status
-- **Edit task details** - Update task title and description
-- **Delete task** - Remove tasks with confirmation
-- **Search tasks** - Search by task name or description (case-insensitive)
-- **Filter tasks** - Filter by All Tasks, Incomplete, or Completed
-- **Search + Filter combined** - Search and filter work together seamlessly
+| # | Feature | Description |
+|---|---------|-------------|
+| 1 | **Add a task** | Create tasks with a required title and optional description |
+| 2 | **Mark complete / incomplete** | Toggle a task's completion status |
+| 3 | **Edit task details** | Modify a task's title and description (existing data is pre-loaded into the edit form) |
+| 4 | **Delete task** | Remove a task with a two-step confirmation to prevent accidents |
+| 5 | **Search tasks** | Search by task title or description (debounced, case-insensitive partial match) |
+| 6 | **Filter tasks** | Filter by **All Tasks**, **Incomplete**, or **Completed** |
+| 6b | **Search + Filter combined** | Search and filter work together seamlessly (e.g., search for "report" + filter "Completed" returns only completed tasks matching "report") |
+
+> No authentication, no due dates, no categories — only the core features listed above.
 
 ---
 
 ## Tech Stack
 
 ### Frontend
-- **React 18** - UI library
-- **Vite 5** - Build tool & dev server
-- **Vanilla CSS** - Clean, responsive styling
+- **React 18** — Hooks (useState, useEffect, useMemo)**
+- **Vite 5** — Build tool & dev server with `/api` proxy to backend
+- **Vanilla CSS** — Responsive, two-column side-by-side layout with sticky form
 
 ### Backend
-- **Node.js** - Runtime
-- **Express 4** - Web framework
-- **pg (node-postgres)** - PostgreSQL client
-- **express-async-handler** - Async error handling
-- **cors** - Cross-Origin Resource Sharing
-- **dotenv** - Environment variables
+- **Node.js** — Runtime
+- **Express 4** — RESTful API with clean separation (routes → controllers → DB)
+- **pg (node-postgres)** — Parameterized queries (SQL-safe)
+- **express-async-handler** — Async/await route error handling
+- **cors** — Cross-Origin Resource Sharing
+- **dotenv** — Environment variable management
+- **Custom request logger** — Colorful Laravel-style terminal logging of every API request
 
 ### Database
-- **PostgreSQL** - Relational database
+- **PostgreSQL** — Auto-creates the `tasks` table on first startup
 
 ---
 
 ## Project Structure
 
 ```
-Practical Exam/
+TaskManagement/
 ├── backend/
 │   ├── config/
-│   │   └── db.js                 # PostgreSQL connection & table init
+│   │   └── db.js                 # PostgreSQL Pool + automatic table creation
 │   ├── controllers/
-│   │   └── taskController.js     # Request handlers / business logic
+│   │   └── taskController.js     # Business logic + input validation
 │   ├── middleware/
-│   │   └── errorMiddleware.js    # 404 & error handling
+│   │   ├── errorMiddleware.js    # 404 handler + centralized JSON error response
+│   │   └── requestLogger.js     # Colorful request / response terminal logger
 │   ├── routes/
-│   │   └── taskRoutes.js        # API route definitions
-│   ├── .env.example             # Environment variables template
+│   │   └── taskRoutes.js        # RESTful route definitions
+│   ├── .env                     # Database credentials (create from .env.example)
+│   ├── .env.example
 │   ├── package.json
 │   └── server.js                # Express app entry point
-└── frontend/
-    ├── src/
-    │   ├── components/
-    │   │   ├── TaskForm.jsx         # Add/Edit task form
-    │   │   ├── TaskItem.jsx        # Single task display + actions
-    │   │   ├── TaskList.jsx         # Task list container
-    │   │   └── SearchFilterBar.jsx # Search input + filter tabs
-    │   ├── services/
-    │   │   └── taskApi.js         # API client (fetch wrappers)
-    │   ├── App.jsx                # Root component (state & logic)
-    │   ├── App.css                # App styles
-    │   ├── index.css              # Global styles & CSS variables
-    │   └── main.jsx             # React entry point
-    ├── index.html
-    ├── vite.config.js
-    └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── TaskForm.jsx         # Add / Edit task form (edit pre-populated on edit
+│   │   │   ├── TaskItem.jsx        # Single task with checkbox + edit/delete actions
+│   │   │   ├── TaskList.jsx         # List with loading / empty / error states
+│   │   │   └── SearchFilterBar.jsx # Search input + All/Incomplete/Completed tabs with counts
+│   │   ├── services/
+│   │   │   └── taskApi.js         # Centralized fetch-based API client with error handling
+│   │   ├── App.jsx                # Root component — state, event handlers, notifications
+│   │   ├── App.css
+│   │   ├── index.css
+│   │   └── main.jsx
+│   ├── index.html
+│   ├── vite.config.js           # Vite + /api proxy to localhost:5000
+│   └── package.json
+├── .gitignore
+└── README.md
 ```
 
 ---
 
 ## Prerequisites
 
-Before running the application, make sure you have the following installed:
+Before running the application make sure you have installed:
 
-1. **Node.js** (v16 or higher) - [download](https://nodejs.org/))
-2. **PostgreSQL** (v12 or higher) - [download](https://www.postgresql.org/download/)
-3. **npm** (comes with Node.js)
+1. **Node.js** ≥ 16** — https://nodejs.org/
+2. **PostgreSQL** ≥ 12** — https://www.postgresql.org/download/
+3. **npm** (bundled with Node.js)
 
 ---
 
 ## Setup Instructions
 
-### 1. Clone / Prepare the Database
+### 1. Create the PostgreSQL Database
 
-First, create the PostgreSQL database:
+Using `psql`, `pgAdmin`, or your preferred PostgreSQL client:
 
 ```sql
--- Using psql or pgAdmin:
-CREATE DATABASE taskmanager;
+CREATE DATABASE task_manager;
 ```
 
-You can also use an existing database; just make sure to update the `PG_DATABASE` value accordingly.
+> **Note:** You can use a different database name; just match it in the `.env` file's `PG_DATABASE` value below.
 
 ---
 
-### 2. Set Up the Backend
+### 2. Configure and Run the Backend
 
 ```bash
-# Navigate to backend directory
+# 1. Go into backend directory
 cd backend
 
-# Install dependencies
+# 2. Install dependencies
 npm install
 
-# Create the .env file from the template
-# (copy or rename .env.example to .env)
-# then edit the values to match your PostgreSQL credentials
+# 3. Copy the env template and edit it with your real Postgres credentials
+copy .env.example .env          # Windows (PowerShell: Copy-Item .env.example .env
+#       — or —
+cp .env.example .env          # macOS/Linux
 ```
 
-**Backend `.env` file configuration:**
+Edit `backend/.env`** (edit values to match your PostgreSQL installation:
 
 ```
 PORT=5000
 PG_HOST=localhost
 PG_PORT=5432
-PG_USER=postgres           # your PostgreSQL username
-PG_PASSWORD=your_password  # your PostgreSQL password
-PG_DATABASE=task_manager  # the database you created
+PG_USER=postgres            # your PostgreSQL username
+PG_PASSWORD=your_password   # your PostgreSQL password
+PG_DATABASE=task_manager      # the database you created in step 1
 ```
 
-> **Note:** The `tasks` table is automatically created the first time the backend starts (no manual migrations needed).
-
----
-
-### 3. Set Up the Frontend
+Start the backend:
 
 ```bash
-# In a NEW terminal, navigate to frontend directory
-cd frontend
+# Development mode (auto-reloads on code changes using nodemon):
+npm run dev
 
-# Install dependencies
-npm install
-```
-
-The frontend uses Vite's built-in proxy (`/api` → `http://localhost:5000`) so no extra config is required for local development.
-
----
-
-## Running the Application
-
-You will need **two terminal windows** — one for the backend and one for the frontend.
-
-### Terminal 1 — Start the Backend
-
-```bash
-cd backend
-
-# Development mode (auto-reloads with nodemon):
-npm run dev  
-# OR production mode:
+# — or production mode:
 npm start
 ```
 
-The backend API will run on **http://localhost:5000**
+The backend API runs on **http://localhost:5000** and every request is logged to the terminal in a colorful Laravel-style format.
 
-You can verify it's running by visiting:
-- `GET http://localhost:5000/api/health` → should return `{ status: "ok" }`
+**Verify it's running by opening in your browser or Postman:
+
+```
+GET http://localhost:5000/api/health
+```
+
+→ returns: `{ "status": "ok", "message": "Task Manager API is running" }`
 
 ---
 
-### Terminal 2 — Start the Frontend
+### 3. Set Up and Run the Frontend
+
+In a **second** terminal window:
 
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
 
-The frontend will run on **http://localhost:5173**
+The frontend runs on **http://localhost:5173** — open this URL in your browser to use the application.
 
-Open this URL in your browser to use the application.
+Vite automatically proxies all `/api/*` requests to `http://localhost:5000` (configured in `vite.config.js`) so no CORS setup is needed for local development.
 
 ---
 
-## API Endpoints
+## RESTful API Endpoints
 
 All endpoints are prefixed with `/api/tasks`.
 
-| Method | Endpoint            | Description                                  | Query Params               |
-|--------|---------------------|----------------------------------------------|----------------------------|
-| GET    | `/api/tasks`       | List tasks (with optional search & filtering)   | `search`, `filter`         |
-| POST   | `/api/tasks`       | Create a new task                          | Body: `{ title, description }` |
-| GET    | `/api/tasks/:id`   | Get a single task by ID                     | —                          |
-| PUT    | `/api/tasks/:id`   | Update task (title, description, completed) | Body: partial task data      |
-| DELETE | `/api/tasks/:id`   | Delete a task                                | —                          |
-| PATCH  | `/api/tasks/:id/toggle` | Toggle task completion status        | —                          |
+| Method | Endpoint                 | Description                                  | Request Body / Query Params |
+| :----- | :--------------------- | :--------------------------------------- | :----------------------- |
+| GET    | `/api/tasks`          | List tasks (with optional search + filter)  | Query: `search`, `filter`  |
+| POST   | `/api/tasks`          | Create a new task                        | Body: `{ title, description }` |
+| GET    | `/api/tasks/:id`      | Get a single task by ID                   | —                        |
+| PUT    | `/api/tasks/:id`      | Update a task (partial updates supported)      | Body: `{ title?, description?, completed? }` |
+| DELETE | `/api/tasks/:id`      | Delete a task                            | —                        |
+| PATCH  | `/api/tasks/:id/toggle` | Toggle a task's `completed` boolean    | —                        |
 
-### Query Params for GET /api/tasks
+### GET `/api/tasks` Query Parameters
 
-- **`search`** (optional): text to search in title or description (case-insensitive, partial match)
+- **`search`** (optional) — Free-text search against `title` or `description` (case-insensitive, `ILIKE %value%`)
 - **`filter`** (optional):
-  - `all` (default) — show all tasks
-  - `incomplete` — only incomplete tasks
-  - `completed` — only completed tasks
+  - `all`** (default) — returns every task
+  - `incomplete` — only `completed = false`
+  - `completed` — only `completed = true`
 
-Example combined request:
+**Example combined request:**
 
 ```
 GET /api/tasks?search=report&filter=completed
 ```
 
-Returns completed tasks where title or description contains "report".
+→ Returns only completed tasks whose title or description contains "report".
 
-### Data Model — Task
+### Task Data Model
 
 ```json
 {
@@ -219,49 +213,63 @@ Returns completed tasks where title or description contains "report".
 }
 ```
 
+### Database Schema (auto-created)
+
+```sql
+CREATE TABLE IF NOT EXISTS tasks (
+  id          SERIAL PRIMARY KEY,
+  title       VARCHAR(255) NOT NULL,
+  description TEXT DEFAULT '',
+  completed   BOOLEAN DEFAULT FALSE,
+  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
 ---
 
-## Key Directories & Files of Note
+## Frontend Highlights
 
-- **[server.js** — Express app initialization, global middleware, error handlers
-- **db.js** — PostgreSQL Pool setup & automatic table creation
-- **taskController.js** — All request handlers with input validation
-- **taskRoutes.js** — RESTful route definitions
-- **App.jsx** — Root component managing task state, API calls, search/filter debouncing (250ms), notifications, edit mode
-- **taskApi.js** — Centralized API client wrapping fetch with consistent error handling
+| Area | Implementation notes |
+| :--- | :----------- |
+| **Component structure** | 4 single-purpose components: `TaskForm`, `TaskItem`, `TaskList`, `SearchFilterBar` |
+| **State management** | Lifted to `App.jsx` using `useState`, derived data with `useMemo` for filter counts |
+| **Edit form** | On clicking "Edit", `editingTask` is set and a `useEffect` in `TaskForm` pre-populates title and description into the form fields |
+| **Search debouncing** | 250 ms debounce to avoid spamming the API on every keystroke |
+| **Notifications** | Success/error toast notifications (auto-dismiss 3 s) |
+| **List rendering** | `TaskList` maps tasks to `TaskItem`s. Has proper **Loading, Error, and Empty** states |
+| **Search + filter** | Work together — both query params are sent together; backend combines them in SQL |
+| **Delete UX** | Two-step confirm/cancel to prevent accidental deletion |
+| **Layout** | Two-column CSS grid: form (sticky left, fixed width 380 px), tasks list (1fr right); collapses to 1 column below 900 px |
+| **API client** | `services/taskApi.js` Centralized `taskApi.js` wraps `fetch` with consistent error throwing across all 6 endpoints |
 
 ---
 
-## Validation & Error Handling
+## Backend Highlights
 
-### Backend
-- Task **title is required** and must be ≤ 255 characters
-- Description is optional; empty strings are stored as `''`
-- `completed` must be a boolean when provided
-- 404 returned for non-existent task IDs
-- 400 with descriptive message for invalid input
-- Centralized error middleware returns JSON with `message` (and `stack` in non-production)
-
-### Frontend
-- Form-level validation before submission
-- Error displays inline in the task form
-- Loading, empty-state, and error states for the task list
-- Delete requires a two-step Confirm/Cancel to prevent accidental deletion
-- Notifications appear after successful operations (auto-dismiss after 3s)
+| Area | Implementation notes |
+| :--- | :----------- |
+| **Separation of concerns** | `routes → controllers → db config, each in dedicated folders |
+| **Parameterized queries** | Every SQL query uses `$1, $2, pg` parameter binding — safe against SQL injection |
+| **Input validation** | Title required, max 255 chars; `completed` must be boolean; 404 for missing task; partial PUT supported; bodies trimmed of whitespace |
+| **Error handling** | `express-async-handler` + `errorMiddleware` centralize errors to consistent JSON format. In dev, stacktrace included |
+| **Request logging** | Custom `requestLogger.js` middleware logs every request with colorized method / status / duration / size / URL / IP + body preview |
+| **Auto DB init** | `initDB` in `config/db.js` auto-creates `tasks` table if it doesn't exist on server start — no migrations to run manually |
 
 ---
 
 ## Build for Production
 
-### Frontend Build
+### Frontend
 
 ```bash
 cd frontend
 npm run build
 ```
 
-This generates an optimized production build in `frontend/dist/`.
-Preview it with:
+Output goes to `frontend/dist/` — optimized, minified, hashed assets.
+
+Preview the build locally with:
 
 ```bash
 npm run preview
@@ -271,23 +279,45 @@ npm run preview
 
 ## Troubleshooting
 
-**"Database connection failed**
-- Verify PostgreSQL is running
-- Double-check `.env` values (host, port, user, password, database)
-- Ensure the `task_manager` database exists
+**"Database initialization failed: ..."**
+- Ensure PostgreSQL service is running
+- Check `.env` credentials (host, port, user, password, database name all correct
+- Make sure the database `task_manager` actually exists
+- In PowerShell terminal and you can connect with the user `postgres` to that DB with that password
 
-**"relation "tasks" does not exist"**
-- The backend creates the table automatically on first run. If you see this, restart the backend; it will create the table. If the error persists, manually run the SQL from `config/db.js` manually in your database.
+**"relation tasks does not exist"**
+- Restart the backend. On startup, `initDB()` runs `CREATE TABLE IF NOT EXISTS` — it will create the table automatically. If not, run the SQL above manually with psql/pgAdmin
 
-**CORS errors**
-- The backend enables CORS for all origins by default. For production, restrict origins in `server.js`.
+**CORS / Network errors in browser**
+- Backend already `cors()` is applied globally. Dev server proxies `/api` → backend. For production deploy, serve frontend from same origin or set explicit origin in `server.js` cors options.
 
-**Port 5000 or 5173 is in use**
-- Change the `PORT` in the backend `.env` (and update the Vite proxy in `frontend/vite.config.js`)
-- Or use `lsof -i :5000` / `netstat -ano | findstr :5000` to find and kill the process.
+**Port 5000 or 5173 already in use**
+- Windows (PowerShell): `netstat -ano | findstr :5000` then `taskkill /PID <pid> /F`
+- Or change backend `PORT` in the backend `.env` and update the `target` in `frontend/vite.config.js` server.proxy./api accordingly
 
 ---
 
-## License
+## Running Both Services Summary (Quick Start)
+
+Terminal 1 — Backend:
+
+```bash
+cd backend
+npm install
+# create .env from .env.example
+npm run dev
+```
+
+Terminal 2 — Frontend:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:5173
+
+---
 
 For assessment / demonstration purposes.
