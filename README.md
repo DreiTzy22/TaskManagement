@@ -92,7 +92,7 @@ First, create the PostgreSQL database:
 
 ```sql
 -- Using psql or pgAdmin:
-CREATE DATABASE task_manager;
+CREATE DATABASE taskmanager;
 ```
 
 You can also use an existing database; just make sure to update the `PG_DATABASE` value accordingly.
