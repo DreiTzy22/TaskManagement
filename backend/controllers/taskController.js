@@ -46,12 +46,22 @@ const createTask = asyncHandler(async (req, res) => {
     throw new Error('Task title is required');
   }
 
+  if (!description || description.trim() === '') {
+    res.status(400);
+    throw new Error('Task description is required');
+  }
+
   const cleanTitle = title.trim();
-  const cleanDescription = description ? description.trim() : '';
+  const cleanDescription = description.trim();
 
   if (cleanTitle.length > 255) {
     res.status(400);
     throw new Error('Task title must be 255 characters or less');
+  }
+
+  if (cleanDescription.length > 1000) {
+    res.status(400);
+    throw new Error('Task description must be 1000 characters or less');
   }
 
   const result = await pool.query(
@@ -89,7 +99,15 @@ const updateTask = asyncHandler(async (req, res) => {
   }
 
   if (description !== undefined) {
-    cleanDescription = typeof description === 'string' ? description.trim() : '';
+    if (typeof description !== 'string' || description.trim() === '') {
+      res.status(400);
+      throw new Error('Task description is required');
+    }
+    if (description.trim().length > 1000) {
+      res.status(400);
+      throw new Error('Task description must be 1000 characters or less');
+    }
+    cleanDescription = description.trim();
   }
 
   if (completed !== undefined) {

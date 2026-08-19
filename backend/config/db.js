@@ -6,7 +6,7 @@ const pool = new Pool({
   port: process.env.PG_PORT || 5432,
   user: process.env.PG_USER || 'postgres',
   password: process.env.PG_PASSWORD || '',
-  database: process.env.PG_DATABASE || 'task_manager',
+  database: process.env.PG_DATABASE || 'taskmanager',
 });
 
 const createTablesQuery = `

@@ -38,6 +38,7 @@ function App() {
       setAllTasks(all);
     } catch (err) {
       setError(err.message || 'Failed to load tasks');
+      showNotification(err.message || 'Failed to load tasks', 'error');
     } finally {
       setLoading(false);
     }
@@ -63,19 +64,27 @@ function App() {
   }, [allTasks]);
 
   const handleAdd = async (title, description) => {
-    const newTask = await createTask(title, description);
-    setTasks((prev) => [newTask, ...prev]);
-    setAllTasks((prev) => [newTask, ...prev]);
-    showNotification('Task added successfully');
+    try {
+      const newTask = await createTask(title, description);
+      setTasks((prev) => [newTask, ...prev]);
+      setAllTasks((prev) => [newTask, ...prev]);
+      showNotification('Task added successfully');
+    } catch (err) {
+      showNotification(err.message || 'Failed to add task', 'error');
+    }
   };
 
   const handleToggle = async (id) => {
-    const updated = await toggleTaskComplete(id);
-    setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
-    setAllTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
-    showNotification(
-      updated.completed ? 'Task marked as completed' : 'Task marked as incomplete'
-    );
+    try {
+      const updated = await toggleTaskComplete(id);
+      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      setAllTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      showNotification(
+        updated.completed ? 'Task marked as completed' : 'Task marked as incomplete'
+      );
+    } catch (err) {
+      showNotification(err.message || 'Failed to toggle task', 'error');
+    }
   };
 
   const handleEdit = (task) => {
@@ -85,11 +94,15 @@ function App() {
   };
 
   const handleUpdate = async (id, data) => {
-    const updated = await updateTask(id, data);
-    setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
-    setAllTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
-    setEditingTask(null);
-    showNotification('Task updated successfully');
+    try {
+      const updated = await updateTask(id, data);
+      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      setAllTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      setEditingTask(null);
+      showNotification('Task updated successfully');
+    } catch (err) {
+      showNotification(err.message || 'Failed to update task', 'error');
+    }
   };
 
   const handleCancelEdit = () => {
@@ -97,10 +110,14 @@ function App() {
   };
 
   const handleDelete = async (id) => {
-    await deleteTask(id);
-    setTasks((prev) => prev.filter((t) => t.id !== id));
-    setAllTasks((prev) => prev.filter((t) => t.id !== id));
-    showNotification('Task deleted successfully');
+    try {
+      await deleteTask(id);
+      setTasks((prev) => prev.filter((t) => t.id !== id));
+      setAllTasks((prev) => prev.filter((t) => t.id !== id));
+      showNotification('Task deleted successfully');
+    } catch (err) {
+      showNotification(err.message || 'Failed to delete task', 'error');
+    }
   };
 
   return (

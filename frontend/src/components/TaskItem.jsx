@@ -3,6 +3,7 @@ import { useState } from 'react';
 const TaskItem = ({ task, onToggle, onEdit, onDelete }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -14,17 +15,33 @@ const TaskItem = ({ task, onToggle, onEdit, onDelete }) => {
     }
   };
 
+  const handleToggle = async () => {
+    setIsToggling(true);
+    try {
+      await onToggle(task.id);
+    } catch (err) {
+      setIsToggling(false);
+      // Error will be handled by App.jsx showNotification
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
   return (
     <div className={`task-item ${task.completed ? 'completed' : ''}`}>
       <div className="task-checkbox-wrapper">
         <input
           type="checkbox"
           checked={task.completed}
-          onChange={() => onToggle(task.id)}
+          onChange={handleToggle}
           className="task-checkbox"
           id={`task-${task.id}`}
+          disabled={isToggling}
         />
         <label htmlFor={`task-${task.id}`} className="checkbox-label" />
+        {isToggling && (
+          <span className="toggle-spinner" />
+        )}
       </div>
 
       <div className="task-content">

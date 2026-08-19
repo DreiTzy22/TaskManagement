@@ -26,6 +26,21 @@ const TaskForm = ({ onAdd, onUpdate, editingTask, onCancelEdit }) => {
       return;
     }
 
+    if (title.trim().length > 255) {
+      setError('Task title must be 255 characters or less');
+      return;
+    }
+
+    if (!description.trim()) {
+      setError('Task description is required');
+      return;
+    }
+
+    if (description.trim().length > 1000) {
+      setError('Task description must be 1000 characters or less');
+      return;
+    }
+
     try {
       if (isEditing) {
         await onUpdate(editingTask.id, { title: title.trim(), description: description.trim() });
@@ -64,17 +79,29 @@ const TaskForm = ({ onAdd, onUpdate, editingTask, onCancelEdit }) => {
           onChange={(e) => setTitle(e.target.value)}
           maxLength={255}
         />
+        <div className="char-count">
+          {title.length}/255 characters
+          {title.length > 250 && (
+            <span className="warning">Approaching limit</span>
+          )}
+        </div>
       </div>
 
       <div className="form-group">
         <label htmlFor="task-description">Description</label>
         <textarea
           id="task-description"
-          placeholder="Enter task description (optional)"
+          placeholder="Enter task description (required)"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
         />
+        <div className="char-count">
+          {description.length}/1000 characters
+          {description.length > 950 && (
+            <span className="warning">Approaching limit</span>
+          )}
+        </div>
       </div>
 
       <div className="form-actions">

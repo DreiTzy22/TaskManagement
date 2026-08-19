@@ -1,4 +1,4 @@
-const API_BASE = '/api/tasks';
+const API_BASE = import.meta.env.VITE_API_BASE || '/api/tasks';
 
 const handleResponse = async (response) => {
   if (!response.ok) {

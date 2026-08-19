@@ -9,7 +9,15 @@ const { initDB } = require('./config/db');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// Configure CORS based on environment
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production'
+    ? ['https://yourdomain.com'] // Replace with your actual domain
+    : true, // Allow all origins in development
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(requestLogger);
 
